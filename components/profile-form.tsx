@@ -69,12 +69,14 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     }
 
     const displayName = formData.get("display_name") as string;
+    const fullName = formData.get("full_name") as string;
 
     startTransition(async () => {
       const { error } = await supabase
         .from("profiles")
         .update({
           display_name: displayName,
+          full_name: fullName || null,
           avatar_url: avatarUrl || null,
         })
         .eq("id", user.id);
@@ -125,6 +127,19 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               defaultValue={profile?.display_name || ""}
               placeholder="Your name"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="full_name">Full Name</Label>
+            <Input
+              id="full_name"
+              name="full_name"
+              defaultValue={profile?.full_name || ""}
+              placeholder="Your full name"
+            />
+            <p className="text-sm text-muted-foreground">
+              Your complete name as you'd like it to appear
+            </p>
           </div>
         </CardContent>
       </Card>
