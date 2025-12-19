@@ -17,7 +17,9 @@ async function getRecipes(search?: string, category?: string) {
     .limit(20);
 
   if (search) {
-    query = query.ilike("title", `%${search}%`);
+    // Enhanced search: search in title, description, and ingredients
+    // Note: For array search, we'll filter results after fetching
+    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
   }
 
   if (category) {
@@ -31,7 +33,25 @@ async function getRecipes(search?: string, category?: string) {
     return [];
   }
 
-  return data || [];
+  // Filter by ingredients if search term provided (array search)
+  let filteredData = data || [];
+  if (search && filteredData.length > 0) {
+    const searchLower = search.toLowerCase();
+    filteredData = filteredData.filter((recipe) => {
+      // Check title and description (already filtered by query)
+      const matchesTitle = recipe.title?.toLowerCase().includes(searchLower);
+      const matchesDescription = recipe.description?.toLowerCase().includes(searchLower);
+      
+      // Check ingredients array
+      const matchesIngredients = recipe.ingredients?.some((ingredient: string) =>
+        ingredient.toLowerCase().includes(searchLower)
+      );
+      
+      return matchesTitle || matchesDescription || matchesIngredients;
+    });
+  }
+
+  return filteredData;
 }
 
 async function getCategories() {

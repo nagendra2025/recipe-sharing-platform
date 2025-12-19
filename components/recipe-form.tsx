@@ -124,11 +124,13 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         const result = await updateRecipe(recipe.id, formData);
         if (result?.error) {
           alert(result.error);
+          return; // Don't redirect on error
         }
       } else {
         const result = await createRecipe(formData);
         if (result?.error) {
           alert(result.error);
+          return; // Don't redirect on error
         }
       }
     });

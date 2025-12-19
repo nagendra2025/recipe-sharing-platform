@@ -84,6 +84,21 @@ export async function updateRecipe(recipeId: string, formData: FormData) {
     image_url: imageUrl || null,
   };
 
+  // First verify the recipe exists and belongs to the user
+  const { data: existingRecipe } = await supabase
+    .from("recipes")
+    .select("user_id")
+    .eq("id", recipeId)
+    .single();
+
+  if (!existingRecipe) {
+    return { error: "Recipe not found" };
+  }
+
+  if (existingRecipe.user_id !== user.id) {
+    return { error: "You can only edit your own recipes" };
+  }
+
   const { error } = await supabase
     .from("recipes")
     .update(recipeData)
@@ -109,6 +124,21 @@ export async function deleteRecipe(recipeId: string) {
 
   if (!user) {
     return { error: "You must be logged in to delete a recipe" };
+  }
+
+  // First verify the recipe exists and belongs to the user
+  const { data: existingRecipe } = await supabase
+    .from("recipes")
+    .select("user_id")
+    .eq("id", recipeId)
+    .single();
+
+  if (!existingRecipe) {
+    return { error: "Recipe not found" };
+  }
+
+  if (existingRecipe.user_id !== user.id) {
+    return { error: "You can only delete your own recipes" };
   }
 
   const { error } = await supabase
